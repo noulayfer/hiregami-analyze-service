@@ -12,19 +12,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CandidateKafkaProducerService {
 
-    private static final String TOPIC = "candidate-profiles-topic";
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
-    @Autowired
-    private ObjectMapper objectMapper;
+  private static final String TOPIC = "candidate-profiles-topic";
+  @Autowired private KafkaTemplate<String, String> kafkaTemplate;
+  @Autowired private ObjectMapper objectMapper;
 
-    public void sendCandidateProfile(CandidateProfile candidateProfile, String metadata) {
-        try {
-            String payload = objectMapper.writeValueAsString(candidateProfile);
-            kafkaTemplate.send(TOPIC, metadata, payload);
-            System.out.println("Message sent to Kafka: " + payload);
-        } catch (JsonProcessingException e) {
-            System.err.println("Error serializing CandidateProfile: " + e.getMessage());
-        }
+  public void sendCandidateProfile(CandidateProfile candidateProfile, String metadata) {
+    try {
+      String payload = objectMapper.writeValueAsString(candidateProfile);
+      kafkaTemplate.send(TOPIC, metadata, payload);
+      System.out.println("Message sent to Kafka: " + payload);
+    } catch (JsonProcessingException e) {
+      System.err.println("Error serializing CandidateProfile: " + e.getMessage());
     }
+  }
 }

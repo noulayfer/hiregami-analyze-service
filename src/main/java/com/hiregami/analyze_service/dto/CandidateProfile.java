@@ -1,12 +1,10 @@
 package com.hiregami.analyze_service.dto;
 
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class CandidateProfile {
-    private String name;
-    private List<String> skills;
+  private String name;
+  private List<String> skills;
 }
-
