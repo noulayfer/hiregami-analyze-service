@@ -1,6 +1,7 @@
 package com.hiregami.analyze_service.controller;
 
 import com.hiregami.analyze_service.dto.CandidateProfile;
+import com.hiregami.analyze_service.dto.Workspace;
 import com.hiregami.analyze_service.service.CandidateKafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,8 @@ public class AnalyzeController {
 
   @PostMapping("/candidate")
   public ResponseEntity<String> processCandidate(
-      @RequestBody CandidateProfile candidateProfile, @RequestBody String metadata) {
-    kafkaProducerService.sendCandidateProfile(candidateProfile, metadata);
+          @RequestBody CandidateProfile candidateProfile, @RequestBody(required = false) Workspace workspace, @RequestBody(required = false) String metadata) {
+    kafkaProducerService.sendCandidateProfile(candidateProfile, workspace, metadata);
     return ResponseEntity.ok("CandidateProfile sent to Kafka successfully.");
   }
 }
