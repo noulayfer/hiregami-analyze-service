@@ -26,6 +26,7 @@ public class Workspace {
     public static class Characteristic {
         private String name;
         private int weight;
+        private static byte contributionInOverallScore;
     }
 
     public void addSkill(Skill skill) {

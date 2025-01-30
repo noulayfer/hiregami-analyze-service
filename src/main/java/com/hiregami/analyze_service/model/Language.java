@@ -5,16 +5,16 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public abstract class Skill {
+public class Language {
     private String name;
-    private int weight;
-    private Level levelOfKnowledge;
+    private Level level;
     private static byte contributionInOverallScore;
 
     public enum Level {
-        ADVANCED(1),
-        INTERN(0.7),
-        NOVICE(0.4),
+        NATIVE(1),
+        UPPER_INTERMEDIATE(0.7),
+        INTERMEDIATE(0.4),
+        BEGINNER(0.2),
         NONE(0);
 
         final double k;
