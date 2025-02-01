@@ -24,9 +24,12 @@ public class CandidateAnalyzeFacade {
         aspects.processFile(context);
         List<Skill> requiredSkills = workspace.getRequiredSkills();
         List<Workspace.Characteristic> desiredCharacteristics = workspace.getDesiredCharacteristics();
+        List<String> languages = workspace.getLanguages();
+        List<Workspace.ExperienceGap> requiredExperience = workspace.getRequiredExperience();
         aspects.retrieveSkillsMatchingWorkspace(requiredSkills);
         aspects.retrieveCharacteristicsMatchingWorkspace(desiredCharacteristics);
-
+        aspects.retrieveLanguageMatchingWorkspace(languages);
+        aspects.retrieveExperienceMatchingWorkspace(requiredExperience);
 
     }
 
