@@ -220,3 +220,346 @@ Make 4 api call in openAI **o3** to retrieve:
 ### Step 4.2 //TODO
 ### Step 4.3 //TODO
 ### Step 4.4 //TODO
+
+## 5. Calculate CandidateScore
+
+#### Skill score
+#### Characteristics score
+#### Language score
+#### Experience score
+
+We should retrieve from Workspace object - 
+**weight** for each of these fields.
+
+There is have to be common 
+**class Score - byte: maxScore, byte: exactScore**
+
+By default, all skills and characteristics evaluated as Advanced.
+If we could receive other information from CV we will set
+matching fields.
+
+### Step 5.1 Calculate skill score
+
+### **Skill Requirements**
+
+In each workspace, required skills are defined with the following attributes:
+- **Name:** The specific skill (e.g., "Java").
+- **Weight:** The importance of the skill, categorized as:
+  - **1** - Optional
+  - **3** - Desirable
+  - **5** - Essential
+- **Level of Knowledge:** The proficiency required for the skill:
+  - **None (0)**
+  - **Novice (0.4)**
+  - **Intern (0.7)**
+  - **Advanced(1.0)**
+
+### **Candidate Profile**
+
+A candidate's profile contains a list of skills with their corresponding proficiency levels. By default, skills are evaluated as "Advanced" unless specified otherwise based on CV data.
+
+### **Scoring Process**
+
+The candidate's skills are compared to the workspace requirements to calculate a score.
+
+1. **If the candidate's skill level is greater than or equal to the required level:**
+  - Full credit is awarded for that skill.
+2. **If the candidate's skill level is below the required level:**
+  - Partial credit is awarded based on the candidate's actual skill level.
+
+---
+
+### 5.2 Characteristics Evaluation
+
+### **Characteristic Requirements**
+
+In each workspace, required characteristics are defined with the following attributes:
+- **Name:** The specific characteristic (e.g., "Leadership").
+- **Weight:** The importance of the characteristic, categorized as:
+  - **1** - Optional
+  - **3** - Desirable
+  - **5** - Essential
+- **Level of Knowledge:** The proficiency required for the characteristic:
+  - **None (0)**
+  - **Novice (0.4)**
+  - **Intern (0.7)**
+  - **Advanced (1.0)**
+
+### **Candidate Profile**
+
+A candidate's profile contains a list of characteristics with their corresponding proficiency levels. By default, characteristics are evaluated as "Advanced" unless specified otherwise based on CV data.
+
+### **Scoring Process**
+
+The candidate's characteristics are compared to the workspace requirements to calculate a score.
+
+1. **If the candidate's characteristic level is greater than or equal to the required level:**
+  - Full credit is awarded for that characteristic.
+2. **If the candidate's characteristic level is below the required level:**
+  - Partial credit is awarded based on the candidate's actual characteristic level.
+
+---
+
+###### Example Scenario
+
+###### **Workspace Requirements:**
+- **Java:** Essential, Intermediate Level
+- **Spring:** Desirable, Beginner Level
+- **Docker:** Optional, Beginner Level
+- **Leadership:** Essential, Advanced Level
+- **Communication:** Desirable, Intern Level
+
+##### **Candidate Profile:**
+- **Java:** Upper Intermediate
+- **Spring:** Beginner
+- **Leadership:** Advanced
+- **Communication:** Novice
+
+##### **Contribution:**
+- Skills contribute **40%** to the total score.
+- Characteristics contribute **30%** to the total score.
+
+##### **Calculation:**
+1. For **Java** and **Spring**, the candidate meets or exceeds the requirements, earning full points.
+2. For **Leadership**, the candidate matches the requirement, earning full points.
+3. For **Communication**, the candidate is below the required level, earning partial points.
+
+The scores are normalized to fit within the respective contributions.
+
+##### **Normalization**
+
+The score is normalized to fit the overall contribution percentage assigned to characteristics in the workspace (e.g., 30%).
+
+**Formula:**
+
+**Normalized Score = (Candidate Score / Workspace Max Score) × Contribution in Overall Score**
+
+Where:
+- **Candidate Score:** The sum of scores for all characteristics based on the candidate's proficiency.
+- **Workspace Max Score:** The maximum possible score a candidate can achieve if they meet all characteristic requirements perfectly.
+- **Contribution in Overall Score:** The percentage weight assigned to characteristics in the overall evaluation (e.g., 30%).
+
+
+---
+
+
+
+### 5.3 **Experience Evaluation System**
+
+We'll integrate the experience evaluation into the existing framework, ensuring it aligns with the same principles of **weighted scoring** and **normalization**. Here's how we'll approach it:
+
+---
+
+###### Experience Evaluation Overview
+
+###### **Key Components:**
+1. **Area of Experience** (e.g., **FinTech**, **Banking**)
+2. **Role** (e.g., **Software Developer**)
+3. **Education** (e.g., **Bachelor in CS**)
+4. **Commercial Experience** (Minimum required years)
+5. **Overall Experience in Sphere** (Broader experience related to the field)
+
+---
+
+###### **Data Model**
+
+#### **ExperienceRequirement Class**
+
+```java
+@Data
+public class ExperienceRequirement {
+    private List<String> areas;                   // e.g., ["FinTech", "Banking"]
+    private String role;                         // Required role, e.g., "Software Developer"
+    private EducationRequirement education;     // Nested class for education details
+    private int minCommercialExperience;         // Minimum required years of commercial experience
+    private int overallExperienceInSphere;       // Preferred overall years of experience
+    private int areaImportanceWeight;            // Weight to define the importance of specific areas
+    private static byte contributionInOverallScore; // Weight contribution to the overall score
+}
+```
+
+### **EducationRequirement Class**
+
+```java
+@Data
+public class EducationRequirement {
+    private String degree;       // e.g., "Bachelor in CS"
+    private int weight;          // Defines the importance of the education in scoring
+}
+```
+
+---
+
+### ** Candidate Experience Profile**
+
+```java
+@Data
+public class CandidateExperience {
+    private List<String> areas;           // Areas where the candidate has experience
+    private String role;                  // Candidate's role
+    private String education;             // Candidate's education
+    private int commercialExperience;     // Candidate's commercial experience in years
+    private int overallExperience;        // Candidate's overall experience in years
+}
+```
+
+---
+
+### **Evaluation Logic**
+
+### **Scoring Process**
+
+1. **Area of Experience:**
+  - If the candidate has experience in the required area:
+    - Full credit based on `areaImportanceWeight`.
+  - If not:
+    - Partial credit or deduction based on importance.
+
+2. **Role:**
+  - Exact match: Full points.
+  - Related role: Partial points.
+
+3. **Education:**
+  - Matches the required degree: Full points.
+  - Related field: Partial points, adjusted by the `weight` parameter.
+
+4. **Commercial Experience:**
+  - If `candidate.commercialExperience >= minCommercialExperience`, full credit.
+  - Otherwise, partial points based on the ratio.
+
+5. **Overall Experience in Sphere:**
+  - Similar logic to commercial experience, comparing years against the `overallExperienceInSphere`.
+
+---
+
+### **Normalization Formula**
+
+**Normalized Score = (Candidate Score / Max Possible Score) × Contribution in Overall Score**
+
+Where:
+- **Candidate Score:** Total score based on all matching experience criteria.
+- **Max Possible Score:** The sum of maximum scores for all experience-related requirements.
+- **Contribution in Overall Score:** The weight assigned to experience in the overall candidate evaluation.
+
+---
+
+### 5.4 Workspace Language Requirements
+
+## Overview
+
+The **Workspace Language Requirements** define the necessary language skills for a job position. This includes mandatory languages that are critical for the role and preferred languages that provide additional value.
+
+---
+
+#### LanguageRequirement Class
+
+```java
+@Data
+@AllArgsConstructor
+class LanguageRequirement {
+    private List<String> languageGroup;       // Group of languages (e.g., ["Ukrainian", "Russian"])
+    private Language.Level requiredLevel;     // Minimum required level of proficiency
+    private boolean mandatory;                // True if the language is mandatory
+    private int priority;                     // 5 = Main (critical), 3 = Preferred
+}
+```
+
+#### **Language Proficiency Levels:**
+
+```java
+public enum Level {
+    NONE(0),
+    BEGINNER(1.0),
+    INTERMEDIATE(1.2),
+    UPPER_INTERMEDIATE(1.3),
+    NATIVE(1.4);
+
+    final double multiplier;
+
+    Level(double multiplier) {
+        this.multiplier = multiplier;
+    }
+}
+```
+
+---
+
+#### Example: Two Main Languages (Both Required)
+
+#### **Workspace Language Requirements**
+
+```java
+List<LanguageRequirement> languageRequirements = List.of(
+    new LanguageRequirement(List.of("Ukrainian"), Language.Level.INTERMEDIATE, true, 5), // Mandatory
+    new LanguageRequirement(List.of("Russian"), Language.Level.INTERMEDIATE, true, 5),   // Mandatory
+    new LanguageRequirement(List.of("English"), Language.Level.UPPER_INTERMEDIATE, false, 3) // Preferred
+);
+```
+
+---
+
+#### Candidate Examples
+
+#### **Candidate 1: Meets All Requirements**
+
+```java
+Candidate candidate = new Candidate("John Doe");
+candidate.addLanguage("Ukrainian", Language.Level.NATIVE);
+candidate.addLanguage("Russian", Language.Level.UPPER_INTERMEDIATE);
+candidate.addLanguage("English", Language.Level.INTERMEDIATE);
+```
+
+- **Ukrainian:** NATIVE (1.4 multiplier) ✅
+- **Russian:** UPPER_INTERMEDIATE (1.3 multiplier) ✅
+- **English:** INTERMEDIATE (1.2 multiplier) ⚠️ *(Below preferred level)*
+
+#### **Score Calculation:**
+
+- **Candidate Score:** `(5 × 1.4) + (5 × 1.3) + (3 × 1.2) = 7 + 6.5 + 3.6 = 17.1`
+- **Max Possible Score:** `5 + 5 + 3 = 13`
+- **Normalized Score (for 15% weight):** `(17.1 / 13) × 15 = 19.73` → **Capped at 15**
+
+---
+
+#### **Candidate 2: Missing One Mandatory Language**
+
+```java
+Candidate candidate = new Candidate("Jane Smith");
+candidate.addLanguage("Ukrainian", Language.Level.NONE);  // ❌ Missing
+candidate.addLanguage("Russian", Language.Level.NATIVE);   // ✅
+candidate.addLanguage("English", Language.Level.NATIVE);   // ✅
+```
+
+- **Ukrainian:** NONE (0 multiplier) ❌ *(Mandatory language missing)*
+- **Russian:** NATIVE (1.4 multiplier) ✅
+- **English:** NATIVE (1.4 multiplier) ✅
+
+### **Penalty Applied:**
+- Since **Ukrainian** is mandatory and missing, the candidate receives a **severe penalty**, reducing the score to **zero or near-zero**.
+
+---
+
+#### Workspace Representation (JSON Example)
+
+```json
+{
+  "languageRequirements": [
+    { "languageGroup": ["Ukrainian"], "requiredLevel": "INTERMEDIATE", "mandatory": true, "priority": 5 },
+    { "languageGroup": ["Russian"], "requiredLevel": "INTERMEDIATE", "mandatory": true, "priority": 5 },
+    { "languageGroup": ["English"], "requiredLevel": "UPPER_INTERMEDIATE", "mandatory": false, "priority": 3 }
+  ]
+}
+```
+
+---
+
+#### Key Rules
+
+1. **Mandatory Languages:**
+  - Missing any mandatory language leads to a **severe penalty**.
+2. **Preferred Languages:**
+  - Contribute positively to the score but are **not deal-breakers**.
+3. **Proficiency Levels:**
+  - Higher levels (e.g., **Native**) receive **bonus multipliers**.
+4. **Normalization:**
+  - The final score is **normalized** based on the workspace's language contribution weight.
