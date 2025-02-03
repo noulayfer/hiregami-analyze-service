@@ -563,3 +563,71 @@ candidate.addLanguage("English", Language.Level.NATIVE);   // ✅
   - Higher levels (e.g., **Native**) receive **bonus multipliers**.
 4. **Normalization:**
   - The final score is **normalized** based on the workspace's language contribution weight.
+
+
+Here's how we can structure the response for the **Analyze Candidate** API, incorporating the updated `CandidateProfile` along with the four evaluation scores.
+
+---
+
+### **API Response Structure**
+
+The response will include:
+
+1. **Updated CandidateProfile**
+2. **Evaluation Scores:**
+  - **Experience Score**
+  - **Skills Score**
+  - **Characteristics Score**
+  - **Languages Score**
+
+### **Example Response**
+
+```json
+{
+  "candidateProfile": {
+    "candidateProfileId": "123e4567-e89b-12d3-a456-426614174000",
+    "firstName": "John",
+    "lastName": "Doe",
+    "skills": [
+      { "name": "Java", "levelOfKnowledge": "ADVANCED" },
+      { "name": "AWS", "levelOfKnowledge": "INTERN" }
+    ],
+    "characteristics": [
+      { "name": "Leadership" },
+      { "name": "Team Player" }
+    ],
+    "languages": [
+      { "name": "English", "level": "NATIVE" },
+      { "name": "Ukrainian", "level": "INTERMEDIATE" }
+    ],
+    "experience": [
+      {
+        "company": "TechCorp",
+        "area": "finTech",
+        "role": "Developer",
+        "actualCommercialExperience": 3,
+        "actualOverallExperience": 5,
+        "education": "Bachelor in CS"
+      }
+    ]
+  },
+  "scores": {
+    "experienceScore": 12,
+    "skillsScore": 38,
+    "characteristicsScore": 25,
+    "languagesScore": 15
+  }
+}
+```
+
+---
+
+### **Key Points:**
+
+- **CandidateProfile** is updated if new information is retrieved during the analysis.
+- **Scores** are normalized based on workspace-defined contributions (e.g., skills might contribute up to 40 points, languages up to 15, etc.).
+- **Database Updates:**
+  - The **CandidateProfile** is updated if necessary.
+  - The **Workspace** is updated in the database if changes are identified during the analysis.
+
+Would you like me to update the API documentation with this response structure?
